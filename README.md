@@ -31,3 +31,5 @@ To use this class:
 You have create three tables: user table, role table and use in role table, in user table, you must have one column for user id, if the user id is different to the user name, then you can create a user name column in user table.
 The user name is the principal.Identity.Name for windows authentication and form authenctication, for Claims based authentication, you can custom it.
 then, this role provide will use the user name to find the user id, and then lookup in the user in role table with the specified user id, if the user id is found and the role id of the specified role is include for this user, then it will return true.
+
+Project url on Nuget: https://nuget.org/packages/GenericDbRoleProvider/
