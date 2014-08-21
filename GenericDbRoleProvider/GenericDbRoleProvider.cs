@@ -136,9 +136,10 @@ namespace CB.Web.Security
             {
                 var r = db.QuerySingle(
                     string.Format("SELECT {0} FROM {1} WHERE {2} = @0", SafeUserIdColumnOfUserTable, SafeUserTableName, SafeUserNameColumnOfUserTable), username);
-                if (r == null)
+                if (r == null || (r is DBNull))
                 {
-                    throw new InvalidOperationException("No User Found");
+                    //throw new InvalidOperationException(string.Format("No User '{0}' Found", username));
+                    continue;
                 }
                 userIds.Add(r[0]);
             }
@@ -167,6 +168,10 @@ namespace CB.Web.Security
                 var userCount = usernames.Length;
                 var roleCount = roleNames.Length;
                 var userIds = GetUserIdsFromNames(db, usernames);
+                if (userIds == null || userIds.Count < userCount)
+                {
+                    throw new InvalidOperationException("Can NOT find user id for one of the user name");
+                }
                 var roleIds = GetRoleIdsFromNames(db, roleNames);
 
                 // Generate a INSERT INTO for each userid/rowid combination, where userIds are the first params, and roleIds follow
@@ -274,7 +279,12 @@ namespace CB.Web.Security
         {
             using (var db = ConnectToDatabase())
             {
-                var userId = GetUserIdsFromNames(db, username)[0];
+                var userIds = GetUserIdsFromNames(db, username);
+                if (userIds == null || userIds.Count <= 0)
+                {
+                    return new string[0];
+                }
+                var userId = userIds[0];
                 if (userId == null)
                 {
                     throw new InvalidOperationException(String.Format("No User {0} Found", username));
@@ -336,6 +346,10 @@ namespace CB.Web.Security
             using (var db = ConnectToDatabase())
             {
                 var userIds = GetUserIdsFromNames(db, usernames);
+                if (userIds == null || userIds.Count < usernames.Length)
+                {
+                    throw new InvalidOperationException("Can NOT find user id for one of the user name");
+                }
                 var roleIds = GetRoleIdsFromNames(db, roleNames);
 
                 foreach (var userId in userIds)
